@@ -74,31 +74,37 @@ export default async function Home() {
           ) : null}
         </div>
 
-        {heroBook ? (
-          <div
-            className="hero-cover-wrap"
-            aria-label={`Featured book: ${heroBook.title}`}
-          >
-            <span className="cover-glow" aria-hidden="true" />
-            <img
-              className="hero-cover"
-              src={heroBook.cover_url}
-              alt={heroBook.cover_alt}
-              width="600"
-              height="900"
-            />
+        <div className="hero-feature">
+          {heroBook ? (
+            <div
+              className="hero-cover-wrap"
+              aria-label={`Featured book: ${heroBook.title}`}
+            >
+              <span className="cover-glow" aria-hidden="true" />
+              <img
+                className="hero-kindle"
+                src="/images/rookie-privateer-kindle.png"
+                alt={`${heroBook.title} shown on an e-reader`}
+                width="1024"
+                height="1536"
+              />
+            </div>
+          ) : null}
+
+          <p className="hero-manifesto" aria-label="Series themes">
+            <span className="manifesto-line">
+              Freedom <span className="manifesto-separator">•</span> Profit{' '}
+              <span className="manifesto-separator">•</span> Friends{' '}
+              <span className="manifesto-separator">•</span> Trouble{' '}
+              <span className="manifesto-separator">•</span> Repeat
+            </span>
+          </p>
+
+          <div className="hero-review">
+            <p>“Fast, fun, and impossible to put down.”</p>
+            <span>— Reader review</span>
           </div>
-        ) : null}
-
-        <div className="hero-review">
-          <p>“Fast, fun, and impossible to put down.”</p>
-          <span>— Reader review</span>
         </div>
-
-        <p className="hero-manifesto" aria-label="Series themes">
-          Freedom <span>•</span> Profit <span>•</span> Friends <span>•</span>{' '}
-          Trouble <span>•</span> Repeat
-        </p>
       </section>
 
       <section id="books" className="book-section">
