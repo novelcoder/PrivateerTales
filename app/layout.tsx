@@ -5,6 +5,9 @@ export const metadata: Metadata = {
   title: 'Privateer Tales | Jamie McFarlane',
   description:
     'Bold crews, distant worlds, and twenty space-opera adventures by Jamie McFarlane.',
+  icons: {
+    icon: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({

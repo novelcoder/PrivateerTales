@@ -266,10 +266,7 @@ h3 {
   position: relative;
   display: grid;
   min-height: min(48rem, 94vh);
-  grid-template-columns: minmax(19rem, 0.95fr) minmax(14rem, 0.58fr) minmax(
-      10rem,
-      0.55fr
-    );
+  grid-template-columns: minmax(19rem, 0.9fr) minmax(24rem, 1.1fr);
   align-items: center;
   gap: clamp(1.5rem, 3vw, 3rem);
   overflow: hidden;
@@ -375,20 +372,23 @@ h3 {
 .hero-cover-wrap {
   position: relative;
   z-index: 1;
-  justify-self: center;
-  width: min(22vw, 19rem);
-  min-width: 13rem;
-  perspective: 900px;
+  width: min(31vw, 28rem);
+  min-width: 18rem;
 }
 
 .cover-glow {
   position: absolute;
-  inset: 16% -25% -12%;
-  background: rgba(18, 137, 204, 0.31);
-  filter: blur(4rem);
+  z-index: -1;
+  inset: 13% -10% 4%;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(242, 99, 30, 0.17),
+    rgba(8, 10, 12, 0.25) 50%,
+    transparent 74%
+  );
+  filter: blur(3.2rem);
 }
 
-.hero-cover,
 .detail-cover {
   position: relative;
   width: 100%;
@@ -398,37 +398,49 @@ h3 {
     0 0 4rem rgba(52, 153, 209, 0.2);
 }
 
-.hero-cover {
-  transform: rotateY(-5deg) rotateZ(-0.6deg);
+.hero-kindle {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(-1.2rem 1.45rem 1.45rem rgba(0, 0, 0, 0.58));
+}
+
+.hero-feature {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .hero-manifesto {
-  position: absolute;
-  right: clamp(1.5rem, 4vw, 4rem);
-  bottom: 5.4rem;
-  display: flex;
-  width: 8rem;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.25rem 0.4rem;
-  margin: 0;
+  display: block;
+  width: min(100%, 32rem);
+  margin: -1rem 0 0;
   color: #adc0cf;
   font-family: var(--font-geist-mono);
-  font-size: 0.67rem;
-  letter-spacing: 0.13em;
+  font-size: clamp(0.56rem, 0.75vw, 0.67rem);
+  letter-spacing: clamp(0.08em, 0.12vw, 0.13em);
   line-height: 1.6;
   text-align: right;
   text-transform: uppercase;
 }
 
-.hero-manifesto span {
+.manifesto-line {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.hero-manifesto .manifesto-separator {
+  margin: 0 0.18rem;
   color: var(--signal);
 }
 
 .hero-review {
-  position: absolute;
-  right: clamp(1.5rem, 4vw, 4rem);
-  bottom: 1.5rem;
+  width: min(100%, 32rem);
+  margin-top: 0.75rem;
   text-align: right;
 }
 
@@ -918,12 +930,8 @@ h3 {
   }
 
   .hero {
-    grid-template-columns: minmax(17rem, 1fr) minmax(12rem, 0.62fr);
-  }
-
-  .hero-manifesto,
-  .hero-review {
-    display: none;
+    grid-template-columns: minmax(17rem, 0.9fr) minmax(19rem, 1.1fr);
+    gap: clamp(1rem, 2vw, 1.75rem);
   }
 
   .series-slide {
@@ -1015,13 +1023,26 @@ h3 {
   }
 
   .hero-cover-wrap {
-    grid-row: 1;
-    width: min(50vw, 13rem);
+    width: min(76vw, 20.5rem);
     min-width: 0;
+  }
+
+  .hero-feature {
+    grid-row: 1;
   }
 
   .hero-copy {
     grid-row: 2;
+  }
+
+  .hero-manifesto,
+  .hero-review {
+    width: min(100%, 31rem);
+  }
+
+  .hero-manifesto {
+    font-size: clamp(0.52rem, 2.7vw, 0.62rem);
+    letter-spacing: 0.08em;
   }
 
   .book-section {
