@@ -36,15 +36,8 @@ function stringValue(value: unknown, fallback = '') {
   return typeof value === 'string' ? value : fallback;
 }
 
-async function getAppwriteApiKey() {
-  if (process.env.APPWRITE_API_KEY) return process.env.APPWRITE_API_KEY;
-
-  try {
-    const { env } = await import('cloudflare:workers');
-    return (env as Record<string, unknown>).APPWRITE_API_KEY;
-  } catch {
-    return undefined;
-  }
+function getAppwriteApiKey() {
+  return process.env.PRIVATEER_CATALOG_API_KEY ?? process.env.APPWRITE_API_KEY;
 }
 
 async function appwriteHeaders() {
@@ -52,7 +45,7 @@ async function appwriteHeaders() {
     'X-Appwrite-Project': APPWRITE_PROJECT_ID,
   };
 
-  const apiKey = await getAppwriteApiKey();
+  const apiKey = getAppwriteApiKey();
   if (typeof apiKey === 'string' && apiKey) {
     headers['X-Appwrite-Key'] = apiKey;
   }
@@ -140,7 +133,7 @@ export async function getPrivateerHomeData(): Promise<{
   series: SeriesRecord;
   books: BookRecord[];
 }> {
-  if (!(await getAppwriteApiKey())) {
+  if (!getAppwriteApiKey()) {
     throw new Error(
       'APPWRITE_API_KEY is required to load the Privateer Tales catalog.',
     );
