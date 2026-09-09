@@ -48,7 +48,7 @@ export default async function Home() {
 
   return (
     <main>
-      <SiteHeader series={series} />
+      <SiteHeader series={series} firstBookSlug={heroBook?.slug} />
 
       <section id="top" className="hero">
         <div className="hero-copy">

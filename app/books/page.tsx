@@ -26,7 +26,11 @@ export default async function BooksPage() {
 
   return (
     <main>
-      <SiteHeader series={series} active="books" />
+      <SiteHeader
+        series={series}
+        firstBookSlug={books[0]?.slug}
+        active="books"
+      />
       <section className="page-masthead">
         <p className="eyebrow">The complete series</p>
         <h1>Reading order</h1>

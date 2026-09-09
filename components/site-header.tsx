@@ -5,9 +5,11 @@ import type { SeriesRecord } from '@/lib/appwrite';
 
 export function SiteHeader({
   series,
+  firstBookSlug,
   active = 'home',
 }: {
   series: SeriesRecord;
+  firstBookSlug?: string;
   active?: 'home' | 'books';
 }) {
   return (
@@ -35,7 +37,10 @@ export function SiteHeader({
         <Link href="/#news">News</Link>
       </nav>
 
-      <Link className="button button-small" href="/books">
+      <Link
+        className="button button-small"
+        href={firstBookSlug ? `/books/${firstBookSlug}` : '/books'}
+      >
         Start here
       </Link>
     </header>

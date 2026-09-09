@@ -46,7 +46,11 @@ export default async function BookPage({ params }: BookPageProps) {
 
   return (
     <main>
-      <SiteHeader series={series} active="books" />
+      <SiteHeader
+        series={series}
+        firstBookSlug={books[0]?.slug}
+        active="books"
+      />
       <article className="book-detail">
         <div className="detail-cover-wrap">
           <img
