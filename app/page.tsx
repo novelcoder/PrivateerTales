@@ -30,7 +30,7 @@ const discoveryCards = [
     title: 'Ships & gear',
     description: 'From the Sterra to the latest acquisitions.',
     action: 'Take a look',
-    href: '/books',
+    href: '/ships',
   },
   {
     id: 'reading-order',
