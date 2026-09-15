@@ -30,14 +30,14 @@ export type BookRecord = {
   release_date: string;
 };
 
-type AppwriteDocument = Record<string, unknown> & { $id: string };
+type AppwriteRow = Record<string, unknown> & { $id: string };
 
 function stringValue(value: unknown, fallback = '') {
   return typeof value === 'string' ? value : fallback;
 }
 
 function getAppwriteApiKey() {
-  return process.env.PRIVATEER_CATALOG_API_KEY ?? process.env.APPWRITE_API_KEY;
+  return process.env.PRIVATEER_CATALOG_API_KEY;
 }
 
 async function appwriteHeaders() {
@@ -60,43 +60,54 @@ async function appwriteFetch<T>(path: string): Promise<T> {
   });
 
   if (!response.ok) {
-    throw new Error(`Appwrite request failed with status ${response.status}`);
+    const error = (await response.json().catch(() => null)) as {
+      message?: unknown;
+      type?: unknown;
+    } | null;
+    const errorType = typeof error?.type === 'string' ? error.type : '';
+    const errorMessage =
+      typeof error?.message === 'string' ? error.message : response.statusText;
+    const details = [errorType, errorMessage].filter(Boolean).join(': ');
+
+    throw new Error(
+      `Appwrite request failed with status ${response.status}${details ? `: ${details}` : ''}`,
+    );
   }
 
   return response.json() as Promise<T>;
 }
 
-function asSeries(document: AppwriteDocument): SeriesRecord {
+function asSeries(row: AppwriteRow): SeriesRecord {
   return {
-    id: document.$id,
-    name: stringValue(document.name),
-    slug: stringValue(document.slug),
-    tagline: stringValue(document.tagline),
-    description: stringValue(document.description),
-    card_tag: stringValue(document.card_tag),
-    card_meta: stringValue(document.card_meta),
+    id: row.$id,
+    name: stringValue(row.name),
+    slug: stringValue(row.slug),
+    tagline: stringValue(row.tagline),
+    description: stringValue(row.description),
+    card_tag: stringValue(row.card_tag),
+    card_meta: stringValue(row.card_meta),
   };
 }
 
-function asBook(document: AppwriteDocument): BookRecord {
+function asBook(row: AppwriteRow): BookRecord {
   return {
-    id: document.$id,
-    series_number: Number(document.series_number ?? 0),
-    title: stringValue(document.title),
-    slug: stringValue(document.slug),
-    tagline: stringValue(document.tagline),
-    blurb: stringValue(document.blurb),
-    card_description: stringValue(document.card_description),
-    cover_url: stringValue(document.cover_url),
-    cover_thumb_url: stringValue(document.cover_thumb_url),
+    id: row.$id,
+    series_number: Number(row.series_number ?? 0),
+    title: stringValue(row.title),
+    slug: stringValue(row.slug),
+    tagline: stringValue(row.tagline),
+    blurb: stringValue(row.blurb),
+    card_description: stringValue(row.card_description),
+    cover_url: stringValue(row.cover_url),
+    cover_thumb_url: stringValue(row.cover_thumb_url),
     cover_alt: stringValue(
-      document.cover_alt,
-      `${stringValue(document.title, 'Book')} cover`,
+      row.cover_alt,
+      `${stringValue(row.title, 'Book')} cover`,
     ),
-    store_label: stringValue(document.store_label, 'Buy the book'),
-    store_url: stringValue(document.store_url),
-    audible_url: stringValue(document.audible_url),
-    release_date: stringValue(document.release_date),
+    store_label: stringValue(row.store_label, 'Buy the book'),
+    store_url: stringValue(row.store_url),
+    audible_url: stringValue(row.audible_url),
+    release_date: stringValue(row.release_date),
   };
 }
 
@@ -135,22 +146,22 @@ export async function getPrivateerHomeData(): Promise<{
 }> {
   if (!getAppwriteApiKey()) {
     throw new Error(
-      'APPWRITE_API_KEY is required to load the Privateer Tales catalog.',
+      'PRIVATEER_CATALOG_API_KEY is required to load the Privateer Tales catalog.',
     );
   }
 
-  const [seriesDocument, bookList] = await Promise.all([
-    appwriteFetch<AppwriteDocument>(
-      `/databases/${APPWRITE_DATABASE_ID}/collections/series/documents/${PRIVATEER_SERIES_ID}`,
+  const [seriesRow, bookList] = await Promise.all([
+    appwriteFetch<AppwriteRow>(
+      `/tablesdb/${APPWRITE_DATABASE_ID}/tables/series/rows/${PRIVATEER_SERIES_ID}`,
     ),
-    appwriteFetch<{ documents: AppwriteDocument[] }>(
-      `/databases/${APPWRITE_DATABASE_ID}/collections/books/documents?${bookQueries().toString()}`,
+    appwriteFetch<{ rows: AppwriteRow[] }>(
+      `/tablesdb/${APPWRITE_DATABASE_ID}/tables/books/rows?${bookQueries().toString()}`,
     ),
   ]);
 
   return {
-    series: asSeries(seriesDocument),
-    books: bookList.documents.map(asBook),
+    series: asSeries(seriesRow),
+    books: bookList.rows.map(asBook),
   };
 }
 
