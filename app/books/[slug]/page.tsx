@@ -5,6 +5,11 @@ import { notFound } from 'next/navigation';
 
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import {
+  analyticsClick,
+  analyticsView,
+  bookAnalyticsItem,
+} from '@/lib/analytics';
 import { getPrivateerBookBySlug } from '@/lib/appwrite';
 
 type BookPageProps = { params: Promise<{ slug: string }> };
@@ -51,7 +56,12 @@ export default async function BookPage({ params }: BookPageProps) {
         firstBookSlug={books[0]?.slug}
         active="books"
       />
-      <article className="book-detail">
+      <article
+        className="book-detail"
+        {...analyticsView('view_item', {
+          items: [bookAnalyticsItem(book)],
+        })}
+      >
         <div className="detail-cover-wrap">
           <img
             src={book.cover_url}
@@ -85,7 +95,18 @@ export default async function BookPage({ params }: BookPageProps) {
 
           <div className="detail-actions">
             {book.store_url ? (
-              <a className="button" href={book.store_url} rel="noreferrer">
+              <a
+                className="button"
+                href={book.store_url}
+                rel="noreferrer"
+                {...analyticsClick('retailer_click', {
+                  item_id: book.id,
+                  item_name: book.title,
+                  book_number: book.series_number,
+                  format: 'book',
+                  retailer: book.store_label || 'Book retailer',
+                })}
+              >
                 <BookOpen aria-hidden="true" />{' '}
                 {book.store_label || 'Buy the book'}
               </a>
@@ -95,6 +116,13 @@ export default async function BookPage({ params }: BookPageProps) {
                 className="button button-secondary"
                 href={book.audible_url}
                 rel="noreferrer"
+                {...analyticsClick('retailer_click', {
+                  item_id: book.id,
+                  item_name: book.title,
+                  book_number: book.series_number,
+                  format: 'audiobook',
+                  retailer: 'Audible',
+                })}
               >
                 <Headphones aria-hidden="true" /> Listen on Audible
               </a>
@@ -105,7 +133,15 @@ export default async function BookPage({ params }: BookPageProps) {
 
       <nav className="book-pagination" aria-label="Adjacent books">
         {previousBook ? (
-          <Link href={`/books/${previousBook.slug}`}>
+          <Link
+            href={`/books/${previousBook.slug}`}
+            {...analyticsClick('select_item', {
+              item_list_id: 'book_pagination',
+              item_list_name: 'Book pagination',
+              direction: 'previous',
+              items: [bookAnalyticsItem(previousBook, index - 1)],
+            })}
+          >
             <ArrowLeft aria-hidden="true" />
             <span>
               Previous
@@ -116,7 +152,15 @@ export default async function BookPage({ params }: BookPageProps) {
           <span />
         )}
         {nextBook ? (
-          <Link href={`/books/${nextBook.slug}`}>
+          <Link
+            href={`/books/${nextBook.slug}`}
+            {...analyticsClick('select_item', {
+              item_list_id: 'book_pagination',
+              item_list_name: 'Book pagination',
+              direction: 'next',
+              items: [bookAnalyticsItem(nextBook, index + 1)],
+            })}
+          >
             <span>
               Next
               <strong>{nextBook.title}</strong>

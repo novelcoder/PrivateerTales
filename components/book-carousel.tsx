@@ -9,6 +9,11 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from '@/components/ui/carousel';
+import {
+  analyticsClick,
+  analyticsView,
+  bookAnalyticsItem,
+} from '@/lib/analytics';
 import type { BookRecord } from '@/lib/appwrite';
 
 export function BookCarousel({ books }: { books: BookRecord[] }) {
@@ -16,14 +21,24 @@ export function BookCarousel({ books }: { books: BookRecord[] }) {
     <Carousel
       className="series-carousel"
       opts={{ align: 'start', slidesToScroll: 2 }}
+      {...analyticsView('view_item_list', {
+        item_list_id: 'home_series_carousel',
+        item_list_name: 'Home series carousel',
+        items: books.map((book, index) => bookAnalyticsItem(book, index)),
+      })}
     >
       <CarouselContent className="series-carousel-track">
-        {books.map((book) => (
+        {books.map((book, index) => (
           <CarouselItem className="series-slide" key={book.id}>
             <article className="book-card">
               <Link
                 href={`/books/${book.slug}`}
                 aria-label={`${book.title}, Book ${book.series_number}`}
+                {...analyticsClick('select_item', {
+                  item_list_id: 'home_series_carousel',
+                  item_list_name: 'Home series carousel',
+                  items: [bookAnalyticsItem(book, index)],
+                })}
               >
                 <img
                   src={book.cover_thumb_url || book.cover_url}

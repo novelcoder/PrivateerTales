@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Compass, ExternalLink } from 'lucide-react';
 
 import { CookieSettingsButton } from '@/components/analytics-consent';
+import { analyticsClick } from '@/lib/analytics';
 import type { SeriesRecord } from '@/lib/appwrite';
 
 export function SiteFooter({ series }: { series: SeriesRecord }) {
@@ -31,6 +32,11 @@ export function SiteFooter({ series }: { series: SeriesRecord }) {
         className="button footer-button"
         href="https://fickledragon.com/PrivateerTales"
         rel="noreferrer"
+        {...analyticsClick('outbound_click', {
+          placement: 'footer',
+          destination: 'fickle_dragon',
+          link_purpose: 'author_site',
+        })}
       >
         Visit Fickle Dragon <ExternalLink aria-hidden="true" />
       </a>
