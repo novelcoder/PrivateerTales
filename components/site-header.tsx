@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Compass } from 'lucide-react';
 
+import { analyticsClick } from '@/lib/analytics';
 import type { SeriesRecord } from '@/lib/appwrite';
 
 export function SiteHeader({
@@ -40,6 +41,9 @@ export function SiteHeader({
       <Link
         className="button button-small"
         href={firstBookSlug ? `/books/${firstBookSlug}` : '/books'}
+        {...analyticsClick('start_series', {
+          placement: 'site_header',
+        })}
       >
         Start here
       </Link>

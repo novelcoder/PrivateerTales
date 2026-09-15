@@ -4,12 +4,16 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 
+import type { AnalyticsEventParameters } from '@/lib/analytics';
+
 const CONSENT_COOKIE_NAME = 'pt_analytics_consent';
 const CONSENT_COOKIE_VERSION = 'v1';
 const CONSENT_COOKIE_MAX_AGE = 60 * 60 * 24 * 180;
 const OPEN_SETTINGS_EVENT = 'privateer-tales:open-cookie-settings';
 const CONSENT_CHANGED_EVENT = 'privateer-tales:cookie-consent-changed';
 const GOOGLE_SCRIPT_ID = 'privateer-tales-google-analytics';
+const CLICK_EVENT_SELECTOR = '[data-ga-event]';
+const VIEW_EVENT_SELECTOR = '[data-ga-view-event]';
 
 type ConsentChoice = 'granted' | 'denied';
 type ConsentSnapshot = ConsentChoice | 'loading' | null;
@@ -65,6 +69,70 @@ function getGtag(): Gtag {
       window.dataLayer?.push(args);
     });
   return window.gtag;
+}
+
+function parseAnalyticsParameters(value?: string): AnalyticsEventParameters {
+  if (!value) return {};
+
+  try {
+    const parsed = JSON.parse(value) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed as AnalyticsEventParameters;
+    }
+  } catch {
+    // Ignore malformed instrumentation instead of interfering with navigation.
+  }
+
+  return {};
+}
+
+function trackAnalyticsEvent(
+  eventName: string,
+  parameters: AnalyticsEventParameters,
+) {
+  getGtag()('event', eventName, parameters);
+}
+
+function trackedLinkParameters(element: HTMLElement) {
+  const link =
+    element instanceof HTMLAnchorElement
+      ? element
+      : element.closest<HTMLAnchorElement>('a[href]');
+
+  if (!link) return {};
+
+  const linkText = link.textContent?.replace(/\s+/g, ' ').trim().slice(0, 100);
+  let linkDomain = '';
+  let outbound = false;
+
+  try {
+    const url = new URL(link.href);
+    linkDomain = url.hostname;
+    outbound = url.origin !== window.location.origin;
+  } catch {
+    // The browser still handles an unusual link even if analytics cannot parse it.
+  }
+
+  return {
+    link_url: link.href,
+    ...(linkDomain ? { link_domain: linkDomain } : {}),
+    ...(linkText ? { link_text: linkText } : {}),
+    outbound,
+    ...(outbound ? { transport_type: 'beacon' } : {}),
+  };
+}
+
+function getTaggedView(pagePath: string) {
+  const element = document.querySelector<HTMLElement>(VIEW_EVENT_SELECTOR);
+  const eventName = element?.dataset.gaViewEvent;
+  if (!element || !eventName) return null;
+
+  const serializedParameters = element.dataset.gaParams;
+  return {
+    eventName,
+    parameters: parseAnalyticsParameters(serializedParameters),
+    signature: `${pagePath}:${eventName}:${serializedParameters ?? ''}`,
+  };
 }
 
 function setGoogleAnalyticsDisabled(measurementId: string, disabled: boolean) {
@@ -173,6 +241,7 @@ export function AnalyticsConsent() {
   );
   const [settingsAreOpen, setSettingsAreOpen] = useState(false);
   const lastTrackedPath = useRef<string | null>(null);
+  const lastTrackedView = useRef<string | null>(null);
 
   useEffect(() => {
     if (!measurementId) return;
@@ -187,16 +256,43 @@ export function AnalyticsConsent() {
 
     if (choice !== 'granted') {
       lastTrackedPath.current = null;
+      lastTrackedView.current = null;
       if (choice === 'denied') denyAnalytics(measurementId);
       return;
     }
 
     const pagePath = `${window.location.pathname}${window.location.search}`;
-    if (lastTrackedPath.current === pagePath) return;
+    if (lastTrackedPath.current !== pagePath) {
+      enableAnalytics(measurementId, pagePath);
+      lastTrackedPath.current = pagePath;
+    }
 
-    enableAnalytics(measurementId, pagePath);
-    lastTrackedPath.current = pagePath;
+    const taggedView = getTaggedView(pagePath);
+    if (taggedView && lastTrackedView.current !== taggedView.signature) {
+      trackAnalyticsEvent(taggedView.eventName, taggedView.parameters);
+      lastTrackedView.current = taggedView.signature;
+    }
   }, [choice, measurementId, pathname]);
+
+  useEffect(() => {
+    if (!measurementId || choice !== 'granted') return;
+
+    const trackTaggedClick = (event: MouseEvent) => {
+      if (!(event.target instanceof Element)) return;
+
+      const element = event.target.closest<HTMLElement>(CLICK_EVENT_SELECTOR);
+      const eventName = element?.dataset.gaEvent;
+      if (!element || !eventName) return;
+
+      trackAnalyticsEvent(eventName, {
+        ...parseAnalyticsParameters(element.dataset.gaParams),
+        ...trackedLinkParameters(element),
+      });
+    };
+
+    document.addEventListener('click', trackTaggedClick);
+    return () => document.removeEventListener('click', trackTaggedClick);
+  }, [choice, measurementId]);
 
   const isOpen = settingsAreOpen || choice === null;
   if (!measurementId || choice === 'loading' || !isOpen) return null;

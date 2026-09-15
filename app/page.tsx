@@ -4,6 +4,7 @@ import { ArrowRight, BookOpen, Orbit, Rocket, Users } from 'lucide-react';
 import { BookCarousel } from '@/components/book-carousel';
 import { SiteFooter } from '@/components/site-footer';
 import { SiteHeader } from '@/components/site-header';
+import { analyticsClick } from '@/lib/analytics';
 import { getPrivateerHomeData } from '@/lib/appwrite';
 
 const discoveryCards = [
@@ -58,7 +59,16 @@ export default async function Home() {
 
           {heroBook ? (
             <div className="hero-actions">
-              <Link className="button" href={`/books/${heroBook.slug}`}>
+              <Link
+                className="button"
+                href={`/books/${heroBook.slug}`}
+                {...analyticsClick('start_series', {
+                  placement: 'home_hero',
+                  item_id: heroBook.id,
+                  item_name: heroBook.title,
+                  book_number: heroBook.series_number,
+                })}
+              >
                 <span>
                   Start the series
                   <small>
