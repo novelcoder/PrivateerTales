@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Compass, ExternalLink } from 'lucide-react';
 
+import { CookieSettingsButton } from '@/components/analytics-consent';
 import type { SeriesRecord } from '@/lib/appwrite';
 
 export function SiteFooter({ series }: { series: SeriesRecord }) {
@@ -19,6 +20,11 @@ export function SiteFooter({ series }: { series: SeriesRecord }) {
       <div className="footer-join">
         <p className="footer-title">Join the crew</p>
         <p>News, new releases, and exclusive content from Jamie McFarlane.</p>
+      </div>
+
+      <div className="footer-legal" aria-label="Privacy links">
+        <Link href="/privacy">Privacy &amp; cookies</Link>
+        <CookieSettingsButton />
       </div>
 
       <a

@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const { books } = await getPrivateerHomeData();
-  const staticPaths = ['/', '/books', '/ships'];
+  const staticPaths = ['/', '/books', '/ships', '/privacy'];
 
   return [
     ...staticPaths.map((path) => ({
