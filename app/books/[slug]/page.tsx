@@ -98,7 +98,8 @@ export default async function BookPage({ params }: BookPageProps) {
               <a
                 className="button"
                 href={book.store_url}
-                rel="noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 {...analyticsClick('retailer_click', {
                   item_id: book.id,
                   item_name: book.title,
@@ -115,7 +116,8 @@ export default async function BookPage({ params }: BookPageProps) {
               <a
                 className="button button-secondary"
                 href={book.audible_url}
-                rel="noreferrer"
+                target="_blank"
+                rel="noopener noreferrer"
                 {...analyticsClick('retailer_click', {
                   item_id: book.id,
                   item_name: book.title,
