@@ -65,9 +65,9 @@ function getGtag(): Gtag {
   window.dataLayer = window.dataLayer ?? [];
   window.gtag =
     window.gtag ??
-    ((...args: unknown[]) => {
-      window.dataLayer?.push(args);
-    });
+    function () {
+      window.dataLayer?.push(arguments);
+    };
   return window.gtag;
 }
 
